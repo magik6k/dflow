@@ -82,10 +82,10 @@ string sizestr(int64_t in)
         }
 
         string ret = si64(tcn);
-        if (int(10.f * (tcn - float(int(tcn)))))
+        if (int(100.f * (tcn - float(int(tcn)))))
         {
                 ret += ".";
-                ret += si64(int(10.f * (tcn - float(int(tcn)))));
+                ret += si64(int(100.f * (tcn - float(int(tcn)))));
         }
         ret += end;
 
@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
     size_t buf_size = 1;
     void* buf = nullptr;
     bool run = true;
+    int64_t percentDiv = 0;
     freopen(NULL, "rb", stdin);
     freopen(NULL, "wb", stdout);
 
@@ -132,6 +133,7 @@ int main(int argc, char *argv[])
                 cerr << " -d           Do not output data" << endl;
                 cerr << " -l [number]  Stop outputing data when specified amount is reached" << endl;
                 cerr << " -b [number]  Set buffer size to number" << endl;
+                cerr << " -p [number]  Count percent of transfered data - number" << endl;
                 break;
             case 'd':
                 dump = 0;
@@ -143,6 +145,10 @@ int main(int argc, char *argv[])
             case 'b':
                 ++i;
                 buf_size = stoll(argv[i]);
+                break;
+            case 'p':
+                ++i;
+                percentDiv = stoll(argv[i]);
                 break;
             default:
                 cerr << "Unknown argument " << argv[i] << endl;
@@ -204,7 +210,9 @@ int main(int argc, char *argv[])
         if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-start).count()-last > 500)
         {
             last = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-start).count();
-            cerr << "\rTotal: " << sizestr(total) << ", Rate: " << sizestr(lst_rate * (1000/500)) << "/s                     \r" << std::flush;
+            cerr << "\rTotal: " << sizestr(total) << ", Rate: " << sizestr(lst_rate * (1000/500)) << "/s";
+            if(percentDiv > 0) cerr << ", " << ((total*100)/percentDiv) << "%";
+            cerr << "                     \r" << std::flush;
             lst_rate = 0;
         }
     }
